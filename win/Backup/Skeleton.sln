@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Skeleton", "Skeleton.vcproj", "{2C8DED3E-111D-4272-A54A-F1865F02A90E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C8DED3E-111D-4272-A54A-F1865F02A90E}.Debug|x64.ActiveCfg = Debug|x64
+		{2C8DED3E-111D-4272-A54A-F1865F02A90E}.Debug|x64.Build.0 = Debug|x64
+		{2C8DED3E-111D-4272-A54A-F1865F02A90E}.Debug|x86.ActiveCfg = Debug|Win32
+		{2C8DED3E-111D-4272-A54A-F1865F02A90E}.Debug|x86.Build.0 = Debug|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

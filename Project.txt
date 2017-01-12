@@ -1,0 +1,21 @@
+¯S®Ä¦W:Distort -> Moshing Graphic
+
+params:
+
+1. Motion reference layer(Layer)
+
+2. Reference i-frame time(Slider)
+
+3. Layer i-frame time(Slider)
+
+4. Mosh foward(Checkbox)
+
+5. Mosh foward time(Slider)
+
+6. Mosh backward(Checkbox)
+
+7. Mosh backward time(Slider)
+
+8. Block size(Slider)
+
+9. Fill blank with(reference layer | transparent | original layer)

@@ -1,0 +1,9 @@
+*.sbr
+*.bsc
+*.log
+*.tlog
+*.obj
+*.asm
+*.db
+*.sdf
+*.htm

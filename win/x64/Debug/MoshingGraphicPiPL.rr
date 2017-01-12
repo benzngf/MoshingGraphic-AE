@@ -1,0 +1,169 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+resource 'PiPL' (16000) {
+	{	
+		
+		Kind {
+			AEEffect
+		},
+		
+		Name {
+			"Moshing Graphic"
+		},
+		
+		Category {
+			"Distort"
+		},
+
+	
+		CodeWin64X86 {"EntryPointFunc"},
+	
+
+
+
+
+
+
+
+
+
+		
+		AE_PiPL_Version {
+			2,
+			0
+		},
+		
+		AE_Effect_Spec_Version {
+			13,
+			2
+		},
+		
+		AE_Effect_Version {
+			525313	
+		},
+		
+		AE_Effect_Info_Flags {
+			0
+		},
+		
+		AE_Effect_Global_OutFlags {
+		0x00000000 
+
+		},
+		AE_Effect_Global_OutFlags_2 {
+		0x00000008
+		},
+		
+		AE_Effect_Match_Name {
+			"Moshing Graphic"
+		},
+		
+		AE_Reserved_Info {
+			0
+		}
+	}
+};
+
