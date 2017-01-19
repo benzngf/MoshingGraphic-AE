@@ -59,13 +59,13 @@ BEGIN
 	"OLGe", 
 	0L,
 	4L,
-	0L, 
+	2L, 
 
 	"MIB8",
 	"2LGe", 
 	0L,
 	4L,
-	8L, 
+	131080L, 
 
 	"MIB8",
 	"ANMe",

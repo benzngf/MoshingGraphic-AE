@@ -70,9 +70,8 @@ typedef short int			int16;
 
 /* Parameter defaults */
 
-#define	SKELETON_GAIN_MIN		0
-#define	SKELETON_GAIN_MAX		100
-#define	SKELETON_GAIN_DFLT		10
+#define DOWNX in_data->downsample_x.den / in_data->downsample_x.num
+#define DOWNY in_data->downsample_y.den / in_data->downsample_y.num
 
 enum {
 	SKELETON_INPUT = 0,

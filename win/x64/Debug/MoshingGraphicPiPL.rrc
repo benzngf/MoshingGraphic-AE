@@ -58,13 +58,13 @@ BEGIN
 	"OLGe", /* 'eGLO' */
 	0L,
 	4L,
-	0L, 
+	2L, 
 
 	"MIB8",
 	"2LGe", /* 'eGL2' */
 	0L,
 	4L,
-	8L, 
+	131080L, 
 
 	"MIB8",
 	"ANMe",/* 'name' PINameProperty */

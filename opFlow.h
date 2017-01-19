@@ -3,6 +3,7 @@
 typedef struct flowBlock
 {
 	short xDisplace, yDisplace;
+	unsigned short thres;
 } FlowBlock;
 
 typedef struct flowFrame {
@@ -25,8 +26,10 @@ typedef struct seqData {
 typedef struct itData {
 	PF_InData* in_data;
 	SeqData* seq_data;
-	PF_SampPB	 	samp_pb;
+	PF_SampPB	 samp_pb;
+	unsigned short threshold;
 	int currentFrame;
+	int loopData;
 } ItData;
 
 typedef struct tempBlock { //store source block
@@ -38,4 +41,4 @@ const int dir[9][2] = { { -1,-1 },{ 0,-1 },{ 1, -1 },{ -1, 0 },{ 0, 0 },{ 1, 0 }
 
 PF_Err calcOpticFlow(PF_InData* in_data, PF_LayerDef* source, PF_LayerDef* target, int frameNum, SeqData* seqData);
 
-PF_Point getDIstort(PF_InData* in_data, SeqData* seqData, int x, int y, int frameNum);
+PF_Point getDIstort(PF_InData* in_data, SeqData* seqData, int x, int y, int frameNum, unsigned short threshold);
