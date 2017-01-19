@@ -12,6 +12,7 @@ typedef struct flowFrame {
 
 typedef struct seqData {
 	bool ready; //remember to initialize as false
+	bool refreshLayer;
 	int numOfFrame; //updates upon allocating new frames
 
 	int startFrame; //get via parameters
@@ -26,7 +27,6 @@ typedef struct itData {
 	SeqData* seq_data;
 	PF_SampPB	 	samp_pb;
 	int currentFrame;
-	char mesg[5000];
 } ItData;
 
 typedef struct tempBlock { //store source block

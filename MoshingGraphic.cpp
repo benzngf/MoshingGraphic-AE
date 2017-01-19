@@ -1,4 +1,4 @@
-/*******************************************************************/
+﻿/*******************************************************************/
 /*                                                                 */
 /*                      ADOBE CONFIDENTIAL                         */
 /*                   _ _ _ _ _ _ _ _ _ _ _ _ _                     */
@@ -25,6 +25,8 @@
 #include <cstdio>
 #define	FLOAT2FIX2(F)			((PF_Fixed)((F) * 65536 + (((F) < 0) ? -1 : 1)))
 
+char uuu[20] = " (」⊙ω⊙)」";
+char nya[20] = " (／⊙ω⊙)／";
 
 static PF_Err 
 About (	
@@ -62,13 +64,11 @@ enum PARAMS{
 	REFLAYER = 1,
 	REFTIME,
 	LAYERTIME,
-	FOWARDCB,
 	FOWARDTIME,
-	BACKWARDCB,
-	BACKWARDTIME,
-	BLOCKSIZE,
-	APPLYBTN,
-	FILLBLANK
+	AFTERMOSH,
+	THRESHOLD,
+	FILLBLANK,
+	APPLYBTN
 };
 
 static PF_Err 
@@ -86,16 +86,16 @@ ParamsSetup (
 	def.param_type = PF_Param_LAYER;
 	PF_STRCPY(def.name, "Motion reference layer");
 	def.uu.id = 1;
-	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
+	def.flags = PF_ParamFlag_CANNOT_TIME_VARY| PF_ParamFlag_SUPERVISE;
 	if (err = PF_ADD_PARAM(in_data, -1, &def))
 		return err;
 	AEFX_CLR_STRUCT(def);
 
 	def.param_type = PF_Param_FLOAT_SLIDER;
-	PF_STRCPY(def.name, "Reference i-frame time");
+	PF_STRCPY(def.name, "Reference strart-mosh time");
 	def.uu.id = 2;
 	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.fs_d.precision = 2;
+	def.u.fs_d.precision = 0;
 	def.u.fs_d.dephault = 0;
 	def.u.fs_d.slider_min = 0;
 	def.u.fs_d.slider_max = 20;
@@ -107,10 +107,10 @@ ParamsSetup (
 	AEFX_CLR_STRUCT(def);
 
 	def.param_type = PF_Param_FLOAT_SLIDER;
-	PF_STRCPY(def.name, "Layer i-frame time");
+	PF_STRCPY(def.name, "Layer strart-mosh time");
 	def.uu.id = 3;
 	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.fs_d.precision = 2;
+	def.u.fs_d.precision = 0;
 	def.u.fs_d.dephault = 0;
 	def.u.fs_d.slider_min = 0;
 	def.u.fs_d.slider_max = 20;
@@ -121,70 +121,61 @@ ParamsSetup (
 		return err;
 	AEFX_CLR_STRUCT(def);
 
-	def.param_type = PF_Param_CHECKBOX;
-	PF_STRCPY(def.name, "");
-	def.uu.id = 4;
-	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.bd.dephault = true;
-	A_char name[10];
-	PF_STRCPY(name, "Mosh foward");
-	def.u.bd.u.nameptr = name;
-	if (err = PF_ADD_PARAM(in_data, -1, &def))
-		return err;
-	AEFX_CLR_STRUCT(def);
-
 	def.param_type = PF_Param_FLOAT_SLIDER;
-	PF_STRCPY(def.name, "Mosh foward time");
+	PF_STRCPY(def.name, "Mosh time");
 	def.uu.id = 5;
 	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.fs_d.precision = 2;
-	def.u.fs_d.dephault = 1;
+	def.u.fs_d.precision = 0;
+	def.u.fs_d.dephault = 10;
 	def.u.fs_d.slider_min = 0;
-	def.u.fs_d.slider_max = 10;
-	def.u.fs_d.valid_max = 20;
+	def.u.fs_d.slider_max = 300;
+	def.u.fs_d.valid_max = 1000;
 	def.u.fs_d.valid_min = 0;
 	def.u.fs_d.display_flags = 0;
 	if (err = PF_ADD_PARAM(in_data, -1, &def))
 		return err;
 	AEFX_CLR_STRUCT(def);
 
-	def.param_type = PF_Param_CHECKBOX;
-	PF_STRCPY(def.name, "");
+	enum Popup_1 { REPEAT = 1, NOMORE, HOLD };
+	A_char PopupStr_1[100];
+	PF_STRCPY(PopupStr_1, "repeat mosh|no more mosh|hold mosh");
+	def.param_type = PF_Param_POPUP;
+	PF_STRCPY(def.name, "After mosh time");
 	def.uu.id = 6;
-	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.bd.dephault = false;
-	PF_STRCPY(name, "Mosh backward");
-	def.u.bd.u.nameptr = name;
+	def.u.pd.num_choices = 3;
+	def.u.pd.dephault = HOLD;
+	def.u.pd.value = def.u.pd.dephault;
+	def.u.pd.u.namesptr = PopupStr_1;
 	if (err = PF_ADD_PARAM(in_data, -1, &def))
 		return err;
 	AEFX_CLR_STRUCT(def);
-
+	
 	def.param_type = PF_Param_FLOAT_SLIDER;
-	PF_STRCPY(def.name, "Mosh backward time");
+	PF_STRCPY(def.name, "Threshold");
 	def.uu.id = 7;
 	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.fs_d.precision = 2;
-	def.u.fs_d.dephault = 1;
+	def.u.fs_d.precision = 1;
+	def.u.fs_d.dephault = 100;
 	def.u.fs_d.slider_min = 0;
-	def.u.fs_d.slider_max = 10;
-	def.u.fs_d.valid_max = 20;
+	def.u.fs_d.slider_max = 100;
+	def.u.fs_d.valid_max = 100;
 	def.u.fs_d.valid_min = 0;
-	def.u.fs_d.display_flags = 0;
+	def.u.fs_d.display_flags = PF_ValueDisplayFlag_PERCENT;
 	if (err = PF_ADD_PARAM(in_data, -1, &def))
 		return err;
 	AEFX_CLR_STRUCT(def);
 
-	def.param_type = PF_Param_FLOAT_SLIDER;
-	PF_STRCPY(def.name, "Block size");
-	def.uu.id = 8;
-	def.flags = PF_ParamFlag_CANNOT_TIME_VARY;
-	def.u.fs_d.precision = 0;
-	def.u.fs_d.dephault = 2;
-	def.u.fs_d.slider_min = 2;
-	def.u.fs_d.slider_max = 20;
-	def.u.fs_d.valid_max = 50;
-	def.u.fs_d.valid_min = 2;
-	def.u.fs_d.display_flags = 0;
+
+	enum Popup_2{ FILLREF = 1, FILLTRANS, FILLORIGIN };
+	A_char PopupStr_2[100];
+	PF_STRCPY(PopupStr_2, "reference layer|transparent|original layer");
+	def.param_type = PF_Param_POPUP;
+	PF_STRCPY(def.name, "Fill blank with");
+	def.uu.id = 10;
+	def.u.pd.num_choices = 3;
+	def.u.pd.dephault = FILLREF;
+	def.u.pd.value = def.u.pd.dephault;
+	def.u.pd.u.namesptr = PopupStr_2;
 	if (err = PF_ADD_PARAM(in_data, -1, &def))
 		return err;
 	AEFX_CLR_STRUCT(def);
@@ -199,26 +190,9 @@ ParamsSetup (
 		return err;
 	AEFX_CLR_STRUCT(def);
 
-	enum Popup_2{ FILLREF, FILLTRANS, FILLORIGIN };
-	A_char PopupStr_2[100];
-	PF_STRCPY(PopupStr_2, "reference layer|transparent|original layer");
-	def.param_type = PF_Param_POPUP;
-	PF_STRCPY(def.name, "Fill blank with");
-	def.uu.id = 10;
-	def.u.pd.num_choices = 3;
-	def.u.pd.dephault = FILLREF;
-	def.u.pd.value = def.u.pd.dephault;
-	def.u.pd.u.namesptr = PopupStr_2;
-	if (err = PF_ADD_PARAM(in_data, -1, &def))
-		return err;
-	AEFX_CLR_STRUCT(def);
-
-	out_data->num_params = 11;
+	out_data->num_params = 9;
 	return err;
 }
-
-//DEBUG FUNCTION
-//END DEBUG FUNCTION
 
 static PF_Err
 ChangeParam(
@@ -231,7 +205,11 @@ PF_UserChangedParamExtra *extra){
 	AEGP_SuiteHandler suites(in_data->pica_basicP);
 	PF_ParamDef	def;
 	AEFX_CLR_STRUCT(def);
-	
+	if (extra->param_index == REFLAYER) {
+		SeqData* sd = static_cast<SeqData*> (suites.HandleSuite1()->host_lock_handle(in_data->sequence_data));
+		sd->refreshLayer = true;
+		suites.HandleSuite1()->host_unlock_handle(in_data->sequence_data);
+	}
 	if (extra->param_index == APPLYBTN){
 		
 		out_data->out_flags |= PF_OutFlag_FORCE_RERENDER;
@@ -279,6 +257,7 @@ SeqSetup(
 	sd->numHBlock = 0;
 	sd->numVBlock = 0;
 	sd->startFrame = 0;
+	sd->refreshLayer = true;
 	return PF_Err_NONE;
 }
 static PF_Err
@@ -322,29 +301,31 @@ Setup(
 
 	}
 
-	if (sd->startFrame != iTime) { //something bad happened! data must be flushed
+	if (sd->startFrame != iTime || sd->refreshLayer) { //something bad happened! data must be flushed
 		for (int i = 0; i < sd->numOfFrame; i++) {
 			sd->frames[i].ready = false;
 		}
 	}
 
 	//initialize some data
-	PF_ParamDef lp;
-	err = PF_CHECKOUT_PARAM(in_data, REFLAYER, iTime*in_data->time_step, in_data->time_step, in_data->time_scale, &lp);
-	if ( sd->frameWidth != lp.u.ld.width || sd->frameHeight != lp.u.ld.height) {
-		sd->frameWidth = lp.u.ld.width;
-		sd->frameHeight = lp.u.ld.height;
-		for (sd->blockWidth = 1; true; sd->blockWidth *= 2) {
-			sd->numHBlock = (sd->frameWidth / sd->blockWidth) + 1;
-			sd->numVBlock = (sd->frameHeight / sd->blockWidth) + 1;
-			if (sd->numHBlock*sd->numVBlock <= 15000) break;
+	if (sd->refreshLayer) {
+		PF_ParamDef lp;
+		err = PF_CHECKOUT_PARAM(in_data, REFLAYER, iTime*in_data->time_step, in_data->time_step, in_data->time_scale, &lp);
+		if (sd->frameWidth != lp.u.ld.width || sd->frameHeight != lp.u.ld.height) {
+			sd->frameWidth = lp.u.ld.width;
+			sd->frameHeight = lp.u.ld.height;
+			for (sd->blockWidth = 1; true; sd->blockWidth *= 2) {
+				sd->numHBlock = (sd->frameWidth / sd->blockWidth) + 1;
+				sd->numVBlock = (sd->frameHeight / sd->blockWidth) + 1;
+				if (sd->numHBlock*sd->numVBlock <= 15000) break;
+			}
 		}
+		err = PF_CHECKIN_PARAM(in_data, &lp);
+		sd->refreshLayer = false;
 	}
-	err = PF_CHECKIN_PARAM(in_data, &lp);
 
 	sd->ready = true;
-	//out_data->sequence_data = in_data->sequence_data;
-	//suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg,  "framesetup: %llu",suites.HandleSuite1()->host_get_handle_size(in_data->sequence_data));
+
 	suites.HandleSuite1()->host_unlock_handle(in_data->sequence_data);
 	return err;
 }
@@ -360,54 +341,70 @@ PF_LayerDef		*output)
 	AEGP_SuiteHandler	suites(in_data->pica_basicP);
 	/*	Put interesting code here */
 	if (in_data->sequence_data == nullptr) {
-		suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg, "null sequence_data");
+		suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg, "Error: null sequence_data");
 		return PF_Err_NONE;
 	}
 	else {
 		SeqData* sd = static_cast<SeqData*> (suites.HandleSuite1()->host_lock_handle(in_data->sequence_data));
-		//suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg, "render: %llu", suites.HandleSuite1()->host_get_handle_size(in_data->sequence_data));
+		
 		A_long iTime = (FLOAT2FIX(params[REFTIME]->u.fs_d.value / 65536.0f)); //target i-frame number
 		A_long layerTime = (FLOAT2FIX(params[LAYERTIME]->u.fs_d.value / 65536.0f)); //source start frame number
 		A_long curTime = in_data->current_time / in_data->time_step; //current frame number
 
-		PF_ParamDef lp1, lp2;
-		AEFX_CLR_STRUCT(lp1);
-		AEFX_CLR_STRUCT(lp2);
+
+
+		PF_ParamDef *lp1, *lp2;
+		lp1 = new PF_ParamDef();
+		lp2 = new PF_ParamDef();
+		AEFX_CLR_STRUCT(*lp1);
+		AEFX_CLR_STRUCT(*lp2);
 		A_long TimeTmp = (FLOAT2FIX(params[REFTIME]->u.fs_d.value*(in_data->time_step) / 65536.0f));
 		bool nor = false;
-		//suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg, " sd->numOfFrame=%d ; TimeTmp = %d; numHBlock = %d; numVBlock = %d; blockWidth = %d;", sd->numOfFrame, TimeTmp, sd->numHBlock, sd->numVBlock, sd->blockWidth);
+		int calcFrame = 0;
 		int previ = -2;
-		for (int i = 0; i < curTime; i++) { //calculate optical flow!
+		for (int i = 0; i < curTime - layerTime; i++) { //calculate optical flow!
 			if (sd->frames[i].ready == false) {
-				/*if (i >= 1 && previ == i - 1) {
-					err = PF_CHECKIN_PARAM(in_data, &lp1);
+				if (i >= 1 && previ == i - 1) {
+					err = PF_CHECKIN_PARAM(in_data, lp1);
+					delete lp1;
 					lp1 = lp2;
-					err = PF_CHECKOUT_PARAM(in_data, REFLAYER, TimeTmp + in_data->time_step*(i + 1), in_data->time_step, in_data->time_scale, &lp2);
+					lp2 = new PF_ParamDef();
+					AEFX_CLR_STRUCT(*lp2);
+					err = PF_CHECKOUT_PARAM(in_data, REFLAYER, TimeTmp + in_data->time_step*(i + 1), in_data->time_step, in_data->time_scale, lp2);
 				}
 				else {
-					err = PF_CHECKIN_PARAM(in_data, &lp1);
-					err = PF_CHECKIN_PARAM(in_data, &lp2);*/
-					err = PF_CHECKOUT_PARAM(in_data, REFLAYER, (TimeTmp + in_data->time_step*(i)), in_data->time_step, in_data->time_scale, &lp1);
-					err = PF_CHECKOUT_PARAM(in_data, REFLAYER, (TimeTmp + in_data->time_step*(i + 1)), in_data->time_step, in_data->time_scale, &lp2);
-				/*}
-				previ = i;
-				*/
-				err = calcOpticFlow(in_data, &(lp2.u.ld), &(lp1.u.ld), i, sd);
-				if (params[FILLBLANK]->u.pd.value == 1) {
-					suites.WorldTransformSuite1()->copy_hq(in_data->effect_ref, &lp1.u.ld, output, NULL, &output->extent_hint);
-					nor = true;
-				}else if (params[FILLBLANK]->u.pd.value == 2){
-					suites.WorldTransformSuite1()->copy_hq(in_data->effect_ref, &lp2.u.ld, output, NULL, &output->extent_hint);
-					nor = true;
+					err = PF_CHECKIN_PARAM(in_data, lp1);
+					err = PF_CHECKIN_PARAM(in_data, lp2);
+					delete lp1;
+					delete lp2;
+					lp1 = new PF_ParamDef();
+					lp2 = new PF_ParamDef();
+					AEFX_CLR_STRUCT(*lp1);
+					AEFX_CLR_STRUCT(*lp2);
+					err = PF_CHECKOUT_PARAM(in_data, REFLAYER, (TimeTmp + in_data->time_step*(i)), in_data->time_step, in_data->time_scale, lp1);
+					err = PF_CHECKOUT_PARAM(in_data, REFLAYER, (TimeTmp + in_data->time_step*(i + 1)), in_data->time_step, in_data->time_scale, lp2);
 				}
-				err = PF_CHECKIN_PARAM(in_data, &lp1);
-				err = PF_CHECKIN_PARAM(in_data, &lp2);
-				break;
+				previ = i;
+
+				err = calcOpticFlow(in_data, &(lp2->u.ld), &(lp1->u.ld), i, sd);
+				calcFrame++;
+				char out1[100] = "";
+				
+				sprintf_s(out1, "calculated %d frames", calcFrame);
+				//sprintf_s(out2, "frame size: (%d, %d), %dx%d macro blocks", sd->frameWidth, sd->frameHeight, sd->numHBlock, sd->numVBlock);
+				suites.AdvAppSuite2()->PF_InfoDrawText(out1, (calcFrame%2==0)? uuu:nya);
+				//break;
 			}
 		}
-		
-		
-		
+		if (calcFrame >= 1) {
+			err = PF_CHECKIN_PARAM(in_data, lp1);
+			err = PF_CHECKIN_PARAM(in_data, lp2);
+			delete lp1;
+			delete lp2;
+		}
+
+
+
 
 		itData it;
 		it.currentFrame = curTime - layerTime;
@@ -415,23 +412,14 @@ PF_LayerDef		*output)
 		it.seq_data = sd;
 		it.samp_pb.src = &(params[0]->u.ld);
 		it.samp_pb.allow_asynch = false;
-		strncpy_s(it.mesg, "", 1500);
-		if (!nor) {
-			if (it.currentFrame > 0) {
-				suites.Iterate8Suite1()->iterate(in_data, 0, 0, &(params[0]->u.ld), NULL, &it, &fillColor, output);
-				//PF_Point d = getDIstort(it.in_data, it.seq_data, 10, 11, it.currentFrame);
-				//suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg, "(10, 11)->(%d, %d); LayerTime = %d; curTime = %d", d.h, d.v, layerTime, curTime);
-				//suites.ANSICallbacksSuite1()->sprintf(out_data->return_msg, it.mesg);
-			}
-			else {
-				//suites.WorldTransformSuite1()->copy_hq(in_data->effect_ref, &(params[0]->u.ld), output, NULL, &output->extent_hint);
-			}
+		if (it.currentFrame > 0) {
+			suites.Iterate8Suite1()->iterate(in_data, 0, 0, &(params[0]->u.ld), NULL, &it, &fillColor, output);
+		}
+		else {
+			suites.WorldTransformSuite1()->copy_hq(in_data->effect_ref, &(params[0]->u.ld), output, NULL, &output->extent_hint);
 		}
 		suites.HandleSuite1()->host_unlock_handle(in_data->sequence_data);
-		
 	}
-
-	
 	return err;
 }
 
