@@ -173,7 +173,7 @@ ParamsSetup (
 
 	enum Popup_2{ FILLREF = 1, FILLTRANS, FILLORIGIN };
 	A_char PopupStr_2[100];
-	PF_STRCPY(PopupStr_2, "reference layer|transparent|original layer");
+	PF_STRCPY(PopupStr_2, "Reference Layer|Transparent|Original Layer");
 	def.param_type = PF_Param_POPUP;
 	PF_STRCPY(def.name, "Fill blank with");
 	def.uu.id = 10;
@@ -270,7 +270,8 @@ PF_Err fillColor(void* refcon, A_long x, A_long y, PF_Pixel *in, PF_Pixel *out) 
 		PF_Fixed x_fixed = -100<<16, y_fixed = -100 << 16;
 		x_fixed = FLOAT2FIX(((float)d.h) * ((in_data->width)*in_data->downsample_x.num / in_data->downsample_x.den / ((float)it->seq_data->frameWidth)));
 		y_fixed = FLOAT2FIX(((float)d.v) * ((in_data->height)*in_data->downsample_y.num / in_data->downsample_y.den / ((float)it->seq_data->frameHeight)));
-		suites.Sampling8Suite1()->subpixel_sample(in_data->effect_ref, x_fixed, y_fixed, &(it->samp_pb), out);
+		//suites.Sampling8Suite1()->subpixel_sample(in_data->effect_ref, x_fixed, y_fixed, &(it->samp_pb), out);
+		suites.Sampling8Suite1()->nn_sample(in_data->effect_ref, x_fixed, y_fixed, &(it->samp_pb), out);
 	}
 	else {
 		out->alpha = 0;
@@ -477,6 +478,7 @@ PF_LayerDef		*output)
 
 		if (it.currentFrame > 0|| it.loopData>0) {
 			suites.Iterate8Suite1()->iterate(in_data, 0, 0, &(params[0]->u.ld), NULL, &it, &fillColor, output);
+
 			switch (params[FILLBLANK]->u.pd.value) {
 			case 1://ref layer
 				PF_ParamDef checkedOutLayer;
