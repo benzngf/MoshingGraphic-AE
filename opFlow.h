@@ -16,7 +16,6 @@ typedef struct seqData {
 	bool refreshLayer;
 	int numOfFrame; //updates upon allocating new frames
 
-	int startFrame; //get via parameters
 	int frameWidth, frameHeight; //target's size
 	int blockWidth;
 	int numHBlock, numVBlock; //something to do with target's screan ratio
@@ -26,10 +25,12 @@ typedef struct seqData {
 typedef struct itData {
 	PF_InData* in_data;
 	SeqData* seq_data;
-	PF_SampPB	 samp_pb;
+	PF_SampPB samp_pb;
 	unsigned short threshold;
 	int currentFrame;
 	int loopData;
+	float Xscale, Yscale;
+	PF_SampPB composite;
 } ItData;
 
 typedef struct tempBlock { //store source block
