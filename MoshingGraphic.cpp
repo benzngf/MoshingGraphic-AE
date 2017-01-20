@@ -478,10 +478,10 @@ PF_LayerDef		*output)
 
 				err = calcOpticFlow(in_data, &(lp2->u.ld), &(lp1->u.ld), i, sd);
 				calcFrame++;
-				//char out1[100] = "";
-				//sprintf_s(out1, "Calculated %d Frames", calcFrame);
+				char out1[100] = "";
+				sprintf_s(out1, "Calculated %d Frames", calcFrame);
 				//sprintf_s(out2, "frame size: (%d, %d), %dx%d macro blocks", sd->frameWidth, sd->frameHeight, sd->numHBlock, sd->numVBlock);
-				//suites.AdvAppSuite2()->PF_InfoDrawText(out1, (calcFrame % 2 == 0) ? uuu : nya);
+				suites.AdvAppSuite2()->PF_InfoDrawText(out1, (calcFrame % 2 == 0) ? uuu : nya);
 				PF_PROGRESS(in_data, i, itdest);
 				//break;
 			}
