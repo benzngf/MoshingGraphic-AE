@@ -8,3 +8,5 @@
 *.sdf
 *.htm
 *.opendb
+release/*
+promo/*
